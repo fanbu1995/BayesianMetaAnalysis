@@ -1,0 +1,67 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{verbose,tmargin=3cm,bmargin=3cm,lmargin=3cm,rmargin=3cm}
+\setlength{\parskip}{\medskipamount}
+\setlength{\parindent}{0pt}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{babel}
+\usepackage{bbm}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{url}
+\usepackage{multicol}
+\usepackage{natbib}
+\usepackage{color}
+\usepackage[dvipsnames]{xcolor}
+
+\title{Bayesian Meta Analysis with Multiple Data Sources}
+\author{Fan Bu}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+%\section{Introduction}
+
+\paragraph{Setup}
+Let $\theta$ be the parameter of interest (e.g., the log odds ratio, log relative risk, etc.). Suppose we have $N$ different data sources (indexed by $i$), and have chosen $M$ negative controls (indexed by $j$) used in analyses across the data sources. Analysis on data source $i$ yields an effect estimate $\tilde{\theta}_i$ which could be biased (note that we don't necessarily run the same analysis on all data sources), while we denote the \emph{true} effect on data source $i$ by $\theta_i$ and the true bias by $\beta_i$. Assume the following hierarchical normal model
+\begin{align}
+    \theta_i &\sim N(\theta, \gamma^2),\\
+    \tilde\theta_i &\sim N(\theta_i + \beta_i, \omega_i^2).
+\end{align}
+Here $\gamma^2$ characterizes the between-data-source variation of the (log) effect, and $\omega_i^2$ is the (estimated) variance of the estimate $\tilde\theta_i$. 
+
+Let $y_{ij}$ be the estimated (log) effect for the $j$th negative control on the $i$th data source, and let $\tau_{ij}$ be the estimated standard error for this estimate. Denote the true bias for the estimate $y_{ij}$ by $b_{ij}$ (i.e., if there is no bias, $b_{ij} = 0$). Again, assume a hierarchical normal model
+\begin{align}
+    b_{ij} &\sim N(\mu_i, \sigma_i^2),\\
+    y_{ij} &\sim N(b_{ij}, \tau_{ij}^2).
+\end{align}
+Here $\mu_i$ represents the average systematic bias for the $i$th data source. Moreover, assume that the bias of the data-specific estimate also follows the bias distribution
+\begin{equation}
+    \beta_i \sim N(\mu_i, \sigma_i^2).
+\end{equation}
+
+\paragraph{Inference} Assume that the variance terms $\omega_i^2$ and $\tau_{ij}^2$ are known (or reliably estimated). Then the unknown quantities include $\{\theta, \gamma^2, \theta_i, \beta_i, \mu_i, \sigma_i^2, b_{ij}\}$. We may adopt semi-conjugate priors as follows:
+\begin{itemize}
+    \item $\theta \sim N(\theta_0, \epsilon_{\theta}^2)$ and $\mu_i \sim N(\mu_0, \epsilon_{\mu}^2)$;
+    \item $\gamma^2 \sim \text{inv-Gamma}(u_0/2, u_0\gamma^2_0/2)$, and $\sigma_i^2 \sim \text{inv-Gamma}(\nu_0/2, \nu_0\sigma^2_0/2)$.
+\end{itemize}
+
+We can implement a Gibbs sampler to approximate the posterior distributions of all unknown quantities. The following steps shall be run iteratively:
+\begin{enumerate}
+    \item update $b_{ij}$ conditioned on $\sigma_i^2$ and $\mu_i$: $b_{ij} \sim N\left(\frac{\sigma_i^2y_{ij}+\tau_{ij}^2\mu_i}{\sigma_i^2+\tau_{ij}^2}, \frac{\sigma_i^2\tau_{ij}^2}{\sigma_i^2+\tau_{ij}^2}\right)$;
+    \item update $\sigma_i^2$ conditioned on $b_{ij}$ and $\mu_i$: $\sigma_i^2 \sim \text{inv-Gamma}\left(\frac{\nu_0+M+1}{2}, \frac{\nu_0\sigma_0^2 + \sum_{j=1}^M(b_{ij}-\mu_i)^2+(\beta_i-\mu_i)^2}{2}\right)$;
+    \item update $\mu_i$ conditioned on $b_{ij}, \sigma_i^2, \theta_i$: $\mu_i \sim N\left(\frac{\epsilon_{\mu}^2(\sum_{j=1}^M b_{ij}+\beta_i)+\sigma_i^2\mu_0}{(M+1)\epsilon_{\mu}^2 + \sigma_i^2},\frac{\sigma_0^2\epsilon_{\mu}^2}{(M+1)\epsilon_{\mu}^2 + \sigma_i^2}\right)$;
+    \item update $\beta_i$ conditioned on $\mu_i, \theta_i, \sigma_i^2$: $\beta_i \sim N\left(\frac{\sigma_i^2(\tilde\theta_i - \theta_i)+\omega_i^2\mu_i}{\sigma_i^2+\omega_i^2}, \frac{\sigma_i^2\omega_i^2}{\sigma_i^2+\omega_i^2}\right)$;
+    \item update $\theta_i$ conditioned on $\beta_i, \theta, \gamma^2$: $\theta_i \sim N\left(\frac{\gamma^2(\tilde\theta_i-\beta_i)+\omega_i^2\theta}{\gamma^2+\omega_i^2},\frac{\gamma^2\omega_i^2}{\gamma^2+\omega_i^2}\right)$;
+    \item update $\theta$ conditioned on $\theta_i$ and $\gamma^2$: $\theta \sim N\left(\frac{\epsilon_{\theta}^2 \sum_{i=1}^N \theta_i + \gamma^2 \theta_0}{N\epsilon_{\theta}^2 + \gamma^2},\frac{\gamma^2 \epsilon_{\theta}^2}{N\epsilon_{\theta}^2 + \gamma^2}\right)$;
+    \item update $\gamma^2$ conditioned on $\theta$ and $\theta_i$: $\gamma^2 \sim \text{inv-Gamma}\left(\frac{u_0+N}{2}, \frac{u_0\gamma_0^2 + \sum_{i=1}^N (\theta_i - \theta)^2}{2}\right)$.
+\end{enumerate}
+
+
+\end{document}
