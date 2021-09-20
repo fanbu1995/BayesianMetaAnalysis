@@ -14,12 +14,12 @@
 \usepackage{float}
 \usepackage{url}
 \usepackage{multicol}
-\usepackage{natbib}
+\usepackage[round]{natbib}
 \usepackage{color}
 \usepackage[dvipsnames]{xcolor}
 
 \title{Bayesian Meta Analysis with Multiple Data Sources}
-\author{Fan Bu}
+\author{}
 \date{}
 
 \begin{document}
@@ -27,6 +27,8 @@
 \maketitle
 
 %\section{Introduction}
+
+\paragraph{Introduction} In many areas of health science research, it is common that multiple studies are conducted based on multiple observational data sources to investigate similar research questions, and it is also of interest to combine and summarize estimates of a similar quantity obtained from multiple studies. However, there are concerns about biases due to systematic errors in observational data, and previous works have introduced the use of negative controls to detect such biases and adjust the estimates accordingly. 
 
 \paragraph{Setup}
 Let $\theta$ be the parameter of interest (e.g., the log odds ratio, log relative risk, etc.). Suppose we have $N$ different data sources (indexed by $i$), and have chosen $M$ negative controls (indexed by $j$) used in analyses across the data sources. Analysis on data source $i$ yields an effect estimate $\tilde{\theta}_i$ which could be biased (note that we don't necessarily run the same analysis on all data sources), while we denote the \emph{true} effect on data source $i$ by $\theta_i$ and the true bias by $\beta_i$. Assume the following hierarchical normal model
