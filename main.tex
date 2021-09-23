@@ -7,7 +7,7 @@
 \setlength{\parindent}{0pt}
 \usepackage{amsmath}
 \usepackage{amsfonts}
-\usepackage{babel}
+%\usepackage{babel}
 \usepackage{bbm}
 \usepackage{graphicx}
 \usepackage{subcaption}
@@ -26,14 +26,17 @@
 
 \maketitle
 
-\paragraph{Introduction} In many areas of health science research, it is common that multiple studies are conducted on multiple observational data sources to investigate similar research questions, and it is also of interest to combine and summarize estimates of a similar quantity obtained from multiple studies. However, there are concerns about biases due to systematic errors in observational data, and previous works have introduced the use of negative controls to detect such biases and adjust the estimates accordingly \citep{lipsitch2010negative,arnold2016brief,schuemie2018empirical}. Our goal is to combine available estimates from multiple studies while adjusting for biases based on analyses of negative controls. We accomplish this through a Bayesian hierarchical modeling framework. 
+\paragraph{Introduction} In many areas of health science research, it is common that multiple studies are conducted on multiple observational data sources to investigate similar research questions, and it is also of interest to combine and summarize estimates of a similar quantity obtained from multiple studies. 
+However, there are concerns about biases due to systematic errors in observational data, and previous works have introduced the use of negative controls to detect such biases and adjust the estimates accordingly \citep{lipsitch2010negative,arnold2016brief,schuemie2018empirical}. 
+Our goal is to combine available estimates from multiple studies while adjusting for biases based on analyses of negative controls. 
+We accomplish this through a Bayesian hierarchical modeling framework. 
 
 \paragraph{Related work} We build on recent work of combining estimates obtained from multiple sources \citep{yao2021bivariate} and extend existing work that performs calibration on estimates obtained from a single data source \citep{mulgrave2020bayesian}. 
 
 \paragraph{The model}
 We develop a Bayesian hierarchical model to obtain combined estimates from multiple sources while addressing the systematic errors that induce biases at different sources using negative control outcomes.  We assume that the estimated quantities of interest from different sources are the same or equivalent, even though the study designs adopted at those sources can be different. For example, researchers may choose to adopt the case-control design or self-control design depending on the characteristics of different data sources, but the estimated quantity should all be the (log) odds ratio or (log) relative risk of a certain outcome between two exposures. 
 
-Let $\theta \in \mathbb{R}$ denote the common quantity of interest - for simplicity, we will refer to this quantity as the ``effect'' to estimate. Suppose there are $N$ data sources (indexed by $i$), and for source $i$, let the true effect be $\theta_i$. Due to the systematic errors, the obtained estimate $\tilde{\theta}_i$ on source $i$ can be biased, with the true bias being an unknown quantity $\beta_i$. Our goal is to acquire a summary estimate $\theta$ while adjusting for bias $\beta_i$ at source $i$ (and thus effectively also de-biasing the estimate $\tilde\theta_i$). 
+Let $\theta \in \mathbb{R}$ denote the common quantity of interest - for simplicity, we will refer to this quantity as the ``effect'' to estimate. Suppose there are $N$ data sources (indexed by $i$), and for source $i$, let the true effect be $\theta_i$. Due to the systematic errors, the obtained estimate $\tilde{\theta}_i$ on source $i$ can be biased, with the true bias being an unknown quantity $\beta_i$. Our goal is to acquire a summary estimate $\theta$ while adjusting for bias $\beta_i$ at source $i$ (and thus effectively also de-biasing the estimate $\tilde\theta_i$).
 
 Assume the following hierarchical normal model for $\theta_i$ and $\tilde\theta_i$:
 \begin{align}
