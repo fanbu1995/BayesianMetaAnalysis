@@ -7,7 +7,7 @@
 \setlength{\parindent}{0pt}
 \usepackage{amsmath}
 \usepackage{amsfonts}
-%\usepackage{babel}
+\usepackage[english]{babel}
 \usepackage{bbm}
 \usepackage{graphicx}
 \usepackage{subcaption}
@@ -26,15 +26,19 @@
 
 \maketitle
 
-\paragraph{Introduction} In many areas of health science research, it is common that multiple studies are conducted on multiple observational data sources to investigate similar research questions, and it is also of interest to combine and summarize estimates of a similar quantity obtained from multiple studies. 
-However, there are concerns about biases due to systematic errors in observational data, and previous works have introduced the use of negative controls to detect such biases and adjust the estimates accordingly \citep{lipsitch2010negative,arnold2016brief,schuemie2018empirical}. 
+
+\paragraph{Introduction} In many areas of health science research, it is common that multiple studies are conducted on multiple observational data sources to investigate similar research questions, 
+and it is also of interest to combine and summarize estimates of a similar quantity obtained from multiple studies. 
+However, there are concerns about biases due to systematic errors in observational data, and previous works have introduced the use 
+of negative controls to detect such biases and adjust the estimates accordingly \citep{lipsitch2010negative,arnold2016brief,schuemie2018empirical}. 
 Our goal is to combine available estimates from multiple studies while adjusting for biases based on analyses of negative controls. 
 We accomplish this through a Bayesian hierarchical modeling framework. 
 
-\paragraph{Related work} We build on recent work of combining estimates obtained from multiple sources \citep{yao2021bivariate} and extend existing work that performs calibration on estimates obtained from a single data source \citep{mulgrave2020bayesian}. 
+
+\paragraph{Related work} We build on recent work of combining estimates obtained from multiple sources \citep{yao2021bivariate} and extend existing work that performs calibration on estimates obtained from a single data source \citep{mulgrave2020bayesian}.
 
 \paragraph{The model}
-We develop a Bayesian hierarchical model to obtain combined estimates from multiple sources while addressing the systematic errors that induce biases at different sources using negative control outcomes.  We assume that the estimated quantities of interest from different sources are the same or equivalent, even though the study designs adopted at those sources can be different. For example, researchers may choose to adopt the case-control design or self-control design depending on the characteristics of different data sources, but the estimated quantity should all be the (log) odds ratio or (log) relative risk of a certain outcome between two exposures. 
+We develop a Bayesian hierarchical model to obtain combined estimates from multiple sources while addressing the systematic errors that induce biases at different sources using negative control outcomes.  We assume that the estimated quantities of interest from different sources are the same or equivalent, even though the study designs adopted at those sources can be different. For example, researchers may choose to adopt the case-control design or self-control design depending on the characteristics of different data sources, but the estimated quantity should all be the (log) odds ratio or (log) relative risk of a certain outcome between two exposures.
 
 Let $\theta \in \mathbb{R}$ denote the common quantity of interest - for simplicity, we will refer to this quantity as the ``effect'' to estimate. Suppose there are $N$ data sources (indexed by $i$), and for source $i$, let the true effect be $\theta_i$. Due to the systematic errors, the obtained estimate $\tilde{\theta}_i$ on source $i$ can be biased, with the true bias being an unknown quantity $\beta_i$. Our goal is to acquire a summary estimate $\theta$ while adjusting for bias $\beta_i$ at source $i$ (and thus effectively also de-biasing the estimate $\tilde\theta_i$).
 
@@ -43,9 +47,9 @@ Assume the following hierarchical normal model for $\theta_i$ and $\tilde\theta_
     \theta_i &\sim N(\theta, \gamma^2),\\
     \tilde\theta_i &\sim N(\theta_i + \beta_i, \omega_i^2).
 \end{align}
-Here $\gamma^2$ characterizes the between-data-source variation of the (log) effect, and $\omega_i^2$ is the (estimated) variance of the estimate $\tilde\theta_i$. 
+Here $\gamma^2$ characterizes the between-data-source variation of the (log) effect, and $\omega_i^2$ is the (estimated) variance of the estimate $\tilde\theta_i$.
 
-%Let $\theta$ be the parameter of interest (e.g., the log odds ratio, log relative risk, etc.). Suppose we have $N$ different data sources (indexed by $i$), and have chosen  Analysis on data source $i$ yields an effect estimate $\tilde{\theta}_i$ which could be biased (note that we don't necessarily run the same analysis on all data sources), while we denote the \emph{true} effect on data source $i$ by $\theta_i$ and the true bias by $\beta_i$. 
+%Let $\theta$ be the parameter of interest (e.g., the log odds ratio, log relative risk, etc.). Suppose we have $N$ different data sources (indexed by $i$), and have chosen  Analysis on data source $i$ yields an effect estimate $\tilde{\theta}_i$ which could be biased (note that we don't necessarily run the same analysis on all data sources), while we denote the \emph{true} effect on data source $i$ by $\theta_i$ and the true bias by $\beta_i$.
 To adjust for the biases, we select $M$ negative controls (indexed by $j$) used in analyses across the data sources.
 Let $y_{ij}$ denote the estimated effect for the $j$th negative control on the $i$th data source, and let $\tau_{ij}$ be the estimated standard error for this estimate. Denote the true bias for the estimate $y_{ij}$ by $b_{ij}$ (i.e., if there is no bias, $b_{ij} = 0$). Again, assume a hierarchical normal model for the negative control estimates:
 \begin{align}
@@ -57,7 +61,7 @@ Here $\mu_i$ represents the average systematic bias for the $i$th data source. M
     \beta_i \sim N(\mu_i, \sigma_i^2).
 \end{equation}
 
-\paragraph{Inference} The key parameters of interest include $\theta$ (the summary quantity) and also the $\theta_i$'s (the source-specific true effect). We use a Markov chain Monte Carlo inference scheme, more specifically a Gibbs sampler, to conduct Bayesian inference to estimate these parameters as follows. 
+\paragraph{Inference} The key parameters of interest include $\theta$ (the summary quantity) and also the $\theta_i$'s (the source-specific true effect). We use a Markov chain Monte Carlo inference scheme, more specifically a Gibbs sampler, to conduct Bayesian inference to estimate these parameters as follows.
 
 Assume that the variance terms $\omega_i^2$ and $\tau_{ij}^2$ are known (or reliably estimated). Then the unknown quantities of the model include $\{\theta, \gamma^2, \theta_i, \beta_i, \mu_i, \sigma_i^2, b_{ij}\}$. We can adopt the following semi-conjugate priors:
 \begin{itemize}
@@ -76,7 +80,7 @@ With the above semi-conjugate priors, a Gibbs sampler can be easily implemented 
     \item update $\gamma^2$ conditioned on $\theta$ and $\theta_i$: $\gamma^2 \sim \text{inv-Gamma}\left(\frac{u_0+N}{2}, \frac{u_0\gamma_0^2 + \sum_{i=1}^N (\theta_i - \theta)^2}{2}\right)$.
 \end{enumerate}
 
-\paragraph{Discussion} We have assumed normal distributions for between-source variability and the biases throughout for simplicity and also based on previous findings that normal approximations seem to work well in practice \citep{schuemie2018empirical,mulgrave2020bayesian}. However, for cases where the normality assumption doesn't hold (e.g., when the negative control estimates have multi-modal or heavy-tail distributions, or effects from different sources have large dispersion), non-normal models could be considered within the hierarchical model framework. For example, we may extend the normal models to normal mixture models or $t$ distributions. Further, we may consider different transformations for other types of quantities of interest - for example, if the parameter to estimate is a proportion, then we can adopt a logit-normal model or a Beta distribution instead of the log-normal model assumed here. 
+\paragraph{Discussion} We have assumed normal distributions for between-source variability and the biases throughout for simplicity and also based on previous findings that normal approximations seem to work well in practice \citep{schuemie2018empirical,mulgrave2020bayesian}. However, for cases where the normality assumption doesn't hold (e.g., when the negative control estimates have multi-modal or heavy-tail distributions, or effects from different sources have large dispersion), non-normal models could be considered within the hierarchical model framework. For example, we may extend the normal models to normal mixture models or $t$ distributions. Further, we may consider different transformations for other types of quantities of interest - for example, if the parameter to estimate is a proportion, then we can adopt a logit-normal model or a Beta distribution instead of the log-normal model assumed here.
 
 \newpage
 \bibliographystyle{chicago}
