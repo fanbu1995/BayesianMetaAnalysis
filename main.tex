@@ -19,7 +19,7 @@
 \usepackage[dvipsnames]{xcolor}
 
 \title{Bayesian Meta Analysis with Multiple Data Sources}
-\author{Fan Bu, George Hripcsak, David Madigan, Aki Nishimura, Patrick Ryan, Martijn Schuemie, Marc Suchard}
+\author{Fan Bu, George Hripcsak, David Madigan, Aki Nishimura, Patrick Ryan, \\Martijn Schuemie, and Marc Suchard}
 \date{September 2021}
 
 \begin{document}
@@ -51,10 +51,11 @@ but the quantity of interest should all be the (log) odds ratio or (log) relativ
 
 Let $\theta \in \mathbb{R}$ denote the common quantity of interest - for simplicity, we will refer to this quantity as the ``effect'' to estimate.
 Suppose there are $N$ data sources (indexed by $i$), and for source $i$, let the true effect be $\theta_i$.
-Due to systematic errors, observational data at source $i$ can only provide us with the likelihood function $f_i(\tilde{\theta}_i)$
-with respect to a ``biased'' effect $\tilde{\theta}_i$.
-Denote the bias related to the estimation of this quantity by $b_i$ (which is unknown), then we have $\tilde{\theta}_i = \theta_i + b_i$.
-%the obtained estimate $\tilde{\theta}_i$ on source $i$ can be biased, with the true bias being an unknown quantity $\beta_i$.
+Due to systematic errors, observational data at source $i$ can only provide us with information 
+regarding a ``biased'' effect $\tilde{\theta}_i = \theta_i + b_i$, where the bias related to estimation of $\theta_i$ is unknown. 
+We note that we are \textbf{not} simply working with a point estimate of $\tilde{\theta}_i $ and some uncertainty quantification (e.g., an MLE estimate and a standard error estimate), 
+but rather, we possess a full likelihood function $f_i(\tilde{\theta}_i)$ with respect to the data analyzed from data source $i$. 
+In the case that the exact likelihood function $f_i(\cdot)$ is too complicated, we may work with a reasonable approximation. 
 
 Our goal is to acquire a summary estimate $\theta$
 while adjusting for the source-specific bias $b_i$ (and thus effectively acquiring de-biased estimates for $\theta_i$'s).
@@ -68,16 +69,6 @@ which also means
     \tilde\theta_i \sim N(\theta+b_i, \gamma^2).
 \end{equation}
 
-% Assume the following hierarchical normal model for $\theta_i$ and $\tilde\theta_i$:
-% \begin{align}
-%     \theta_i &\sim N(\theta, \gamma^2),\\
-%     \tilde\theta_i &\sim N(\theta_i + \beta_i, \omega_i^2).
-% \end{align}
-% Here $\gamma^2$ characterizes the between-data-source variation of the (log) effect,
-% and $\omega_i^2$ is the (estimated) variance of the estimate $\tilde\theta_i$.
-
-%Let $\theta$ be the parameter of interest (e.g., the log odds ratio, log relative risk, etc.). Suppose we have $N$ different data sources (indexed by $i$), and have chosen  Analysis on data source $i$ yields an effect estimate $\tilde{\theta}_i$ which could be biased (note that we don't necessarily run the same analysis on all data sources), while we denote the \emph{true} effect on data source $i$ by $\theta_i$ and the true bias by $\beta_i$.
-
 To adjust for the biases, $M$ negative controls (indexed by $j$) are selected and used in analyses across the data sources.
 Let $y_{ij}$ denote the estimated effect (i.e., estimated bias) for the $j$th negative control on the $i$th data source. Suppose that $y_{ij}$ follows a bias distribution $P_i$ with density function $p_i(\cdot)$.
 We further assume that the bias $b_i$ also follows the same distribution.
@@ -86,21 +77,6 @@ For example, if we believe that the bias distribution is normal,
 then $\boldsymbol\mu_i = (\beta_i, \tau_i^2)$ where $\beta_i$ is the mean bias and $\tau_i^2$ is the variance.
 
 
-
-% Let $y_{ij}$ denote the estimated effect for the $j$th negative control on the $i$th data source,
-% and let $\tau_{ij}$ be the estimated standard error for this estimate.
-% Denote the true bias for the estimate $y_{ij}$ by $b_{ij}$ (i.e., if there is no bias, $b_{ij} = 0$).
-% Again, assume a hierarchical normal model for the negative control estimates:
-% \begin{align}
-%     b_{ij} &\sim N(\mu_i, \sigma_i^2),\\
-%     y_{ij} &\sim N(b_{ij}, \tau_{ij}^2).
-% \end{align}
-% Here $\mu_i$ represents the average systematic bias for the $i$th data source.
-% Moreover, assume that the bias of the data-specific estimate also follows the bias distribution
-% \begin{equation}
-%     \beta_i \sim N(\mu_i, \sigma_i^2).
-% \end{equation}
-
 \paragraph{Inference}
 The key parameters of interest include $\theta$ (the summary quantity) and also the $\theta_i$'s (the source-specific true effect).
 Additionally, the quantities $b_i, \gamma^2, \boldsymbol\mu$ are also unknown.
@@ -108,8 +84,7 @@ Next we describe the Bayesian inference scheme for estimating the model paramete
 Let $\pi_0$ and $\pi_i$ denote the priors we adopt for $(\theta,\gamma^2)$ and $\boldsymbol\mu_i$, respectively.
 For instance, we can use the normal-inverse-Gamma prior for $\pi_0$ and do the same for $\pi_i$ if we assume a normal bias distribution.
 
-
-We may consider a Markov chain Monte Carlo inference scheme or simply use Hamiltonian Monte Carlo (e.g., through \texttt{stan}). The MCMC algorithm is sketched as follows:
+We may consider a Markov chain Monte Carlo inference scheme or simply use Hamiltonian Monte Carlo. The MCMC algorithm is sketched as follows:
 
 In each iteration, do:
 \begin{enumerate}
@@ -119,33 +94,17 @@ In each iteration, do:
     \item sample $\boldsymbol\mu$ from full conditional $\propto \pi_i(\boldsymbol\mu_i) p_i(b_i; \boldsymbol\mu_i) \prod_{j=1}^M p_i(y_{ij}; \boldsymbol\mu_i)$.
 \end{enumerate}
 Here ``$\text{pnorm}$'' represents the normal density function.
-We note that if a normal model for the biases is assumed (i.e., $P_i$ is normal),
+Steps 1 and 2 of this algorithm are very similar to the Bayesian inference scheme described in \cite{schuemie2021combining}, which have already been implemented in the \texttt{R} package \texttt{EvidenceSynthesis}. 
+If a normal model for the biases is assumed (i.e., $P_i$ is normal),
 then Steps 1, 3 and 4 become trivial updates of hierarchical normal models if we adopt semi-conjugate normal-inverse-Gamma priors.
-The only potential bottleneck is in Step 2, where we may need to run a Metropolis-Hastings step.
+In this simplified scenario, the only potential bottleneck is in Step 2, where a Metropolis-Hastings step may be necessary.
 
 Furthermore, it is possible to directly utilize an estimated (empirical) bias distribution $P_i$ if we so wish.
 In this case, we can keep density function $p_i$ fixed and only run the first three steps in the above algorithm.
 
-% Old version (the normal all the way model) commented out
-
-% Assume that the variance terms $\omega_i^2$ and $\tau_{ij}^2$ are known (or reliably estimated).
-% Then the unknown quantities of the model include $\{\theta, \gamma^2, \theta_i, \beta_i, \mu_i, \sigma_i^2, b_{ij}\}$.
-% We can adopt the following semi-conjugate priors:
-% \begin{itemize}
-%     \item $\theta \sim N(\theta_0, \epsilon_{\theta}^2)$ and $\mu_i \sim N(\mu_0, \epsilon_{\mu}^2)$;
-%     \item $\gamma^2 \sim \text{inv-Gamma}(u_0/2, u_0\gamma^2_0/2)$, and $\sigma_i^2 \sim \text{inv-Gamma}(\nu_0/2, \nu_0\sigma^2_0/2)$.
-% \end{itemize}
-
-% With the above semi-conjugate priors, a Gibbs sampler can be easily implemented to approximate the posterior distributions of all unknown quantities. The following steps shall be run iteratively:
-% \begin{enumerate}
-%     \item update $b_{ij}$ conditioned on $\sigma_i^2$ and $\mu_i$: $b_{ij} \sim N\left(\frac{\sigma_i^2y_{ij}+\tau_{ij}^2\mu_i}{\sigma_i^2+\tau_{ij}^2}, \frac{\sigma_i^2\tau_{ij}^2}{\sigma_i^2+\tau_{ij}^2}\right)$;
-%     \item update $\sigma_i^2$ conditioned on $b_{ij}$ and $\mu_i$: $\sigma_i^2 \sim \text{inv-Gamma}\left(\frac{\nu_0+M+1}{2}, \frac{\nu_0\sigma_0^2 + \sum_{j=1}^M(b_{ij}-\mu_i)^2+(\beta_i-\mu_i)^2}{2}\right)$;
-%     \item update $\mu_i$ conditioned on $b_{ij}, \sigma_i^2, \theta_i$: $\mu_i \sim N\left(\frac{\epsilon_{\mu}^2(\sum_{j=1}^M b_{ij}+\beta_i)+\sigma_i^2\mu_0}{(M+1)\epsilon_{\mu}^2 + \sigma_i^2},\frac{\sigma_0^2\epsilon_{\mu}^2}{(M+1)\epsilon_{\mu}^2 + \sigma_i^2}\right)$;
-%     \item update $\beta_i$ conditioned on $\mu_i, \theta_i, \sigma_i^2$: $\beta_i \sim N\left(\frac{\sigma_i^2(\tilde\theta_i - \theta_i)+\omega_i^2\mu_i}{\sigma_i^2+\omega_i^2}, \frac{\sigma_i^2\omega_i^2}{\sigma_i^2+\omega_i^2}\right)$;
-%     \item update $\theta_i$ conditioned on $\beta_i, \theta, \gamma^2$: $\theta_i \sim N\left(\frac{\gamma^2(\tilde\theta_i-\beta_i)+\omega_i^2\theta}{\gamma^2+\omega_i^2},\frac{\gamma^2\omega_i^2}{\gamma^2+\omega_i^2}\right)$;
-%     \item update $\theta$ conditioned on $\theta_i$ and $\gamma^2$: $\theta \sim N\left(\frac{\epsilon_{\theta}^2 \sum_{i=1}^N \theta_i + \gamma^2 \theta_0}{N\epsilon_{\theta}^2 + \gamma^2},\frac{\gamma^2 \epsilon_{\theta}^2}{N\epsilon_{\theta}^2 + \gamma^2}\right)$;
-%     \item update $\gamma^2$ conditioned on $\theta$ and $\theta_i$: $\gamma^2 \sim \text{inv-Gamma}\left(\frac{u_0+N}{2}, \frac{u_0\gamma_0^2 + \sum_{i=1}^N (\theta_i - \theta)^2}{2}\right)$.
-% \end{enumerate}
+We note that there is no closed-form full conditional distribution for $\theta_i$ (the unbiased effect at source $i$), and thus we do not directly sample it in the above MCMC algorithm. 
+However, a posterior distribution for $\theta_i$ can be easily approximated by a set of constructed samples $\{\theta_i^{(s)}\}$ using $\theta_i^{(s)} = \tilde\theta_i^{(s)} - b_i^{(s)}$, 
+where $\tilde\theta_i^{(s)}$ and $b_i^{(s)}$ are the $s$th obtained samples for $\tilde\theta_i$ and $b_i$ , respectively. 
 
 \paragraph{Discussion}
 We have assumed a normal distribution in \eqref{eq: theta_i-dist} for simplicity and
