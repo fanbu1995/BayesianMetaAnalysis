@@ -82,7 +82,7 @@ The key parameters of interest include $\theta$ (the summary quantity) and also 
 Additionally, the quantities $b_i, \gamma^2, \boldsymbol\mu$ are also unknown.
 Next we describe the Bayesian inference scheme for estimating the model parameters.
 Let $\pi_0$ and $\pi_i$ denote the priors we adopt for $(\theta,\gamma^2)$ and $\boldsymbol\mu_i$, respectively.
-For instance, we can use the normal-inverse-Gamma prior for $\pi_0$ and do the same for $\pi_i$ if we assume a normal bias distribution.
+For instance, we can use the normal-inverse-Gamma prior for $\pi_0$ and do the same for $\pi_i$ if we assume a normal bias distribution. Another possible choice for $\pi_0$ is to adopt the half-Cauchy (``Horseshoe'') prior for $\gamma^2$ for better shrinkage (an implemented sampler can be seen in \cite{nishimura2019regularization}). 
 
 We may consider a Markov chain Monte Carlo inference scheme or simply use Hamiltonian Monte Carlo. The MCMC algorithm is sketched as follows:
 
@@ -94,10 +94,10 @@ In each iteration, do:
     \item sample $\boldsymbol\mu$ from full conditional $\propto \pi_i(\boldsymbol\mu_i) p_i(b_i; \boldsymbol\mu_i) \prod_{j=1}^M p_i(y_{ij}; \boldsymbol\mu_i)$.
 \end{enumerate}
 Here ``$\text{pnorm}$'' represents the normal density function.
-Steps 1 and 2 of this algorithm are very similar to the Bayesian inference scheme described in \cite{schuemie2021combining}, which have already been implemented in the \texttt{R} package \texttt{EvidenceSynthesis}. 
+Steps 1 and 2 of this algorithm are very similar to the Bayesian inference scheme described in \cite{schuemie2021combining}, which have already been implemented in the \texttt{R} package \texttt{EvidenceSynthesis}. If the likelihood function $f_i$ is log-concave, an adaptive rejection sampler \citep{gilks1992adaptive} may be considered. 
 If a normal model for the biases is assumed (i.e., $P_i$ is normal),
-then Steps 1, 3 and 4 become trivial updates of hierarchical normal models if we adopt semi-conjugate normal-inverse-Gamma priors.
-In this simplified scenario, the only potential bottleneck is in Step 2, where a Metropolis-Hastings step may be necessary.
+then Steps 1, 3 and 4 become trivial updates of hierarchical normal models if we adopt semi-conjugate normal-inverse-Gamma priors;
+in this simplified scenario, the only potential bottleneck is in Step 2, where a Metropolis-Hastings step may be necessary.
 
 Furthermore, it is possible to directly utilize an estimated (empirical) bias distribution $P_i$ if we so wish.
 In this case, we can keep density function $p_i$ fixed and only run the first three steps in the above algorithm.
